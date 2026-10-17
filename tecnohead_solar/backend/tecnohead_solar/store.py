@@ -322,7 +322,13 @@ def alerts(db: Database, status: str | None = None) -> list[dict[str, Any]]:
 def diagnostics(db: Database) -> dict[str, Any]:
     db_state = db.fetch_one("SELECT current_database() AS database, pg_size_pretty(pg_database_size(current_database())) AS size") or {}
     pending = db.fetch_one("SELECT count(*) AS count, min(r.captured_at) AS oldest FROM sync_outbox o JOIN readings r ON r.reading_id=o.reading_id WHERE o.acked_at IS NULL") or {}
-    return {"database": db_state, "pending": serialize(pending), "collectors": collectors(db)}
+    latest = db.fetch_one("SELECT value, updated_at FROM app_settings WHERE key=%s", ("diagnostics_latest",))
+    return {
+        "database": db_state,
+        "pending": serialize(pending),
+        "collectors": collectors(db),
+        "last_run": serialize(latest) if latest else None,
+    }
 
 
 def apply_retention(db: Database, days: int) -> int:

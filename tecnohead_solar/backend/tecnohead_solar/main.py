@@ -6,6 +6,7 @@ import ipaddress
 import logging
 import uuid
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -355,7 +356,16 @@ async def run_diagnostics() -> dict[str, Any]:
                 results.append(await _probe_collector(str(collector["id"])))
             except HTTPException as exc:
                 results.append({"ok": False, "collector_id": collector["id"], "status_code": exc.status_code, "detail": exc.detail})
-    return {"ok": all(item.get("ok") for item in results) if results else False, "results": results}
+    result = {
+        "ok": all(item.get("ok") for item in results) if results else False,
+        "captured_at": datetime.now(UTC).isoformat(),
+        "results": results,
+    }
+    db.execute(
+        "INSERT INTO app_settings(key,value) VALUES (%s,%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value,updated_at=now()",
+        ("diagnostics_latest", result),
+    )
+    return result
 
 
 @app.get("/api/v1/readings")

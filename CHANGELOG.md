@@ -2,6 +2,13 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.12 — Homologation evidence and schematic layout
+
+- Preserve the latest field diagnostic result in the local PostgreSQL store and
+  restore it after App reloads.
+- Lay out unpositioned PV inputs deterministically in the technical schematic
+  instead of rendering every panel at one fallback coordinate.
+
 ## 0.1.11 — Latest-sample dashboard summary
 
 - Aggregate the dashboard's AC power and energy cards from the newest sample

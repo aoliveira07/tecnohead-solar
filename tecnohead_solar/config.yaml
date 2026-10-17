@@ -1,6 +1,6 @@
 name: "TecnoHead Solar"
 slug: "tecnohead_solar"
-version: "0.1.11"
+version: "0.1.12"
 description: "Monitor local de microinversores Deye, histórico e diagnóstico solar."
 url: "https://github.com/aoliveira07/tecnohead-solar/tree/main/tecnohead_solar"
 stage: experimental
