@@ -33,6 +33,24 @@ async def health_check(base_url: str, token: str) -> dict[str, Any]:
         return {"state": "offline", "detail": type(exc).__name__}
 
 
+async def remote_history(base_url: str, token: str, since_hours: int, limit: int) -> list[dict[str, Any]]:
+    if not base_url or not token:
+        return []
+    try:
+        async with httpx.AsyncClient(timeout=12, follow_redirects=False) as client:
+            response = await client.get(
+                _safe_url(base_url, "/api/v1/solar/history"),
+                params={"since_hours": since_hours, "limit": limit},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        if response.is_success:
+            body = response.json()
+            return body.get("rows", []) if isinstance(body, dict) else []
+    except (httpx.HTTPError, OSError, ValueError):
+        LOGGER.debug("Remote Solar history unavailable", exc_info=True)
+    return []
+
+
 async def sync_once(db: Database, base_url: str, token: str, installation_id: str) -> dict[str, Any]:
     batch = pending_batch(db, 200)
     if not base_url or not token:

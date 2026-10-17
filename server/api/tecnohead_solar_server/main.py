@@ -11,7 +11,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from . import __version__
-from .db import history, insert_batch, migrate, summary
+from .db import alerts, history, insert_batch, migrate, summary
 from .settings import ServerSettings
 
 LOGGER = logging.getLogger("tecnohead_solar_server")
@@ -78,4 +78,9 @@ async def get_history(
 @app.get("/api/v1/solar/summary", dependencies=[Depends(authenticated)])
 async def get_summary() -> dict[str, Any]:
     return summary(settings)
+
+
+@app.get("/api/v1/solar/alerts", dependencies=[Depends(authenticated)])
+async def get_alerts() -> dict[str, Any]:
+    return {"source": "server_postgresql", "rows": alerts(settings)}
 

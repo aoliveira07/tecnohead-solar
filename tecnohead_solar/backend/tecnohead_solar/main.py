@@ -34,7 +34,7 @@ from .store import (
     setup_installation,
     summary,
 )
-from .sync import health_check
+from .sync import health_check, remote_history
 
 LOGGER = logging.getLogger("tecnohead_solar.web")
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -102,7 +102,12 @@ class MQTTSettingsPayload(BaseModel):
     password: str = ""
 
 
-def _sync_state() -> dict[str, Any]:
+async def _sync_state(current: Settings | None = None) -> dict[str, Any]:
+    current = current or _effective_settings()
+    if current.api_enabled:
+        runtime["api"] = await health_check(current.api_url, current.api_token)
+    else:
+        runtime["api"] = {"state": "disabled", "detail": "API externa desabilitada"}
     return {
         "state": runtime.get("api", {}).get("state", "disabled"),
         "pending_records": summary(db).get("pending_records", 0),
@@ -196,7 +201,7 @@ async def status() -> dict[str, Any]:
         "summary": summary(db),
         "collectors": collectors(db),
         "alerts": alerts(db, "active"),
-        "api": _sync_state(),
+        "api": await _sync_state(current),
         "mqtt": runtime.get("mqtt", {"state": "unknown"}),
         "forecast": forecast,
     }
@@ -344,8 +349,26 @@ async def get_readings(
     since_hours: int = Query(default=24, ge=1, le=24 * 31),
     limit: int = Query(default=500, ge=1, le=5000),
 ) -> dict[str, Any]:
-    rows = readings(db, collector_id=collector_id, pv_input_id=pv_input_id, since_hours=since_hours, limit=limit)
-    return {"source": "local_postgresql", "rows": rows, "count": len(rows), "period_hours": since_hours}
+    current = _effective_settings()
+    local_rows = readings(db, collector_id=collector_id, pv_input_id=pv_input_id, since_hours=since_hours, limit=limit)
+    rows = list(local_rows)
+    if current.api_enabled and current.api_url and current.api_token:
+        local_ids = {str(row["reading_id"]) for row in local_rows if row.get("reading_id")}
+        collector_map = {str(row["id"]): row for row in collectors(db)}
+        pv_map = {str(row["id"]): row for row in pv_inputs(db)}
+        for remote in await remote_history(current.api_url, current.api_token, since_hours, limit):
+            reading_id = str(remote.get("reading_id", ""))
+            if not reading_id or reading_id in local_ids:
+                continue
+            payload = remote.get("payload") if isinstance(remote.get("payload"), dict) else {}
+            merged = {**payload, **remote, "source": "server_postgresql"}
+            collector = collector_map.get(str(merged.get("collector_id")), {})
+            pv = pv_map.get(str(merged.get("pv_input_id")), {})
+            merged.setdefault("collector_name", collector.get("name", "Coletor remoto"))
+            merged.setdefault("pv_name", pv.get("name", "AC"))
+            rows.append(merged)
+    rows.sort(key=lambda row: str(row.get("captured_at", "")), reverse=True)
+    return {"source": "hybrid" if len(rows) > len(local_rows) else "local_postgresql", "rows": rows[:limit], "count": min(len(rows), limit), "period_hours": since_hours}
 
 
 @app.get("/api/v1/forecast")
@@ -367,7 +390,7 @@ async def get_diagnostics() -> dict[str, Any]:
 @app.get("/api/v1/settings")
 async def get_settings() -> dict[str, Any]:
     current = _effective_settings()
-    return {"settings": current.public(), "api": _sync_state()}
+    return {"settings": current.public(), "api": await _sync_state(current)}
 
 
 @app.post("/api/v1/settings/api")
@@ -378,7 +401,7 @@ async def save_api_settings(payload: APISettingsPayload) -> dict[str, Any]:
         values["api_token"] = payload.token
     current.save_private(values)
     _effective_settings()
-    return {"ok": True, "settings": settings.public(), "api": _sync_state()}
+    return {"ok": True, "settings": settings.public(), "api": await _sync_state(_effective_settings())}
 
 
 @app.post("/api/v1/settings/mqtt")
@@ -400,9 +423,7 @@ async def save_mqtt_settings(payload: MQTTSettingsPayload) -> dict[str, Any]:
 @app.post("/api/v1/settings/api/test")
 async def test_api() -> dict[str, Any]:
     current = _effective_settings()
-    state = await health_check(current.api_url, current.api_token) if current.api_enabled else {"state": "disabled"}
-    runtime["api"] = state
-    return state
+    return await _sync_state(current)
 
 
 @app.post("/api/v1/maintenance/retention")
@@ -416,7 +437,13 @@ async def report_csv(
     since_hours: int = Query(default=24, ge=1, le=24 * 31),
     limit: int = Query(default=2000, ge=1, le=5000),
 ) -> Response:
-    rows = readings(db, since_hours=since_hours, limit=limit)
+    current = _effective_settings()
+    local_rows = readings(db, since_hours=since_hours, limit=limit)
+    rows = local_rows
+    if current.api_enabled and current.api_url and current.api_token:
+        remote_rows = await remote_history(current.api_url, current.api_token, since_hours, limit)
+        local_ids = {str(row["reading_id"]) for row in local_rows if row.get("reading_id")}
+        rows = local_rows + [row for row in remote_rows if str(row.get("reading_id")) not in local_ids]
     return Response(content=csv_report(rows), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=tecnohead-solar.csv"})
 
 
@@ -425,5 +452,11 @@ async def report_pdf(
     since_hours: int = Query(default=24, ge=1, le=24 * 31),
     limit: int = Query(default=500, ge=1, le=5000),
 ) -> Response:
-    rows = readings(db, since_hours=since_hours, limit=limit)
+    current = _effective_settings()
+    local_rows = readings(db, since_hours=since_hours, limit=limit)
+    rows = local_rows
+    if current.api_enabled and current.api_url and current.api_token:
+        remote_rows = await remote_history(current.api_url, current.api_token, since_hours, limit)
+        local_ids = {str(row["reading_id"]) for row in local_rows if row.get("reading_id")}
+        rows = local_rows + [row for row in remote_rows if str(row.get("reading_id")) not in local_ids]
     return Response(content=pdf_report(rows), media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=tecnohead-solar.pdf"})

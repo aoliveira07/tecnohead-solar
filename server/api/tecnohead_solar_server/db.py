@@ -139,6 +139,12 @@ def summary(settings: ServerSettings) -> dict[str, Any]:
     return row or {"readings": 0, "latest_at": None, "today": 0}
 
 
+def alerts(settings: ServerSettings) -> list[dict[str, Any]]:
+    schema = _q(settings.db_schema)
+    with connect(settings) as connection:
+        return list(connection.execute(f"SELECT * FROM {schema}.alerts ORDER BY opened_at DESC LIMIT 300").fetchall())
+
+
 def prune(settings: ServerSettings) -> int:
     schema = _q(settings.db_schema)
     with connect(settings) as connection, connection.transaction():
