@@ -2,6 +2,14 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.10 — Supervisor MQTT service discovery
+
+- Consume the Home Assistant MQTT service supplied by Supervisor when the App
+  declares `mqtt:want`, while retaining manual broker options for standalone
+  clients.
+- Persist the last MQTT publish state so the Ingress status reflects the
+  collector worker that actually publishes Discovery messages.
+
 ## 0.1.9 — Corrected micro PV total-energy offsets
 
 - Corrected the Deye micro register map for PV3/PV4 accumulated energy, which are separated from PV1/PV2 by the AC voltage register at address 73.

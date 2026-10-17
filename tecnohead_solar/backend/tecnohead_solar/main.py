@@ -124,6 +124,14 @@ def _effective_settings() -> Settings:
     return settings
 
 
+def _mqtt_state() -> dict[str, Any]:
+    persisted = db.fetch_one("SELECT value FROM app_settings WHERE key=%s", ("mqtt_state",))
+    value = persisted.get("value") if persisted else None
+    if isinstance(value, dict):
+        return value
+    return runtime.get("mqtt", {"state": "unknown"})
+
+
 def _ingress_guard(request: Request) -> JSONResponse | None:
     if request.url.path == "/health":
         return None
@@ -210,7 +218,7 @@ async def status() -> dict[str, Any]:
         "collectors": collectors(db),
         "alerts": alerts(db, "active"),
         "api": await _sync_state(current),
-        "mqtt": runtime.get("mqtt", {"state": "unknown"}),
+        "mqtt": _mqtt_state(),
         "forecast": forecast,
     }
 

@@ -28,3 +28,17 @@ def test_settings_reject_out_of_range_coordinates(tmp_path, monkeypatch) -> None
     assert loaded.latitude is None
     assert loaded.longitude is None
 
+
+def test_settings_accept_supervisor_mqtt_username_alias(tmp_path, monkeypatch) -> None:
+    options = tmp_path / "options.json"
+    private = tmp_path / "settings.json"
+    options.write_text(json.dumps({"mqtt_host": "broker.local"}), encoding="utf-8")
+    monkeypatch.setattr(settings_module, "OPTIONS_PATH", options)
+    monkeypatch.setattr(settings_module, "PRIVATE_SETTINGS_PATH", private)
+    monkeypatch.delenv("MQTT_USERNAME", raising=False)
+    monkeypatch.setenv("MQTT_USER", "supervisor-user")
+
+    loaded = settings_module.Settings.load()
+
+    assert loaded.mqtt_username == "supervisor-user"
+

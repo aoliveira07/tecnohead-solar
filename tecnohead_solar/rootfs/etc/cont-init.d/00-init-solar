@@ -1,4 +1,4 @@
-#!/command/with-contenv bash
+#!/command/with-contenv bashio
 set -euo pipefail
 
 DATA_DIR="/data/tecnohead_solar"
@@ -6,12 +6,39 @@ PGDATA="${DATA_DIR}/postgres"
 SOCKET_DIR="/run/tecnohead-solar"
 PGPORT="55432"
 PG_BIN="$(pg_config --bindir)"
+MQTT_ENV="${SOCKET_DIR}/mqtt.env"
 
 mkdir -p "${DATA_DIR}" "${SOCKET_DIR}"
 chown solarapp:postgres "${DATA_DIR}"
 chmod 0750 "${DATA_DIR}"
 chown -R postgres:solarapp "${SOCKET_DIR}"
 chmod 0770 "${SOCKET_DIR}"
+
+# ``services: - mqtt:want`` lets Supervisor provide the broker connection
+# without putting the broker address or credentials in the public App options.
+# Export the values once during boot so both the web and worker processes use
+# the same discovered connection. Manual App options still take precedence in
+# Settings.load when a customer explicitly configures a broker.
+: > "${MQTT_ENV}"
+if bashio::services.available "mqtt"; then
+  mqtt_host="$(bashio::services mqtt "host")"
+  mqtt_port="$(bashio::services mqtt "port")"
+  mqtt_user="$(bashio::services mqtt "username")"
+  mqtt_password="$(bashio::services mqtt "password")"
+  {
+    printf 'export MQTT_HOST=%q\n' "${mqtt_host}"
+    printf 'export MQTT_PORT=%q\n' "${mqtt_port}"
+    printf 'export MQTT_USERNAME=%q\n' "${mqtt_user}"
+    printf 'export MQTT_USER=%q\n' "${mqtt_user}"
+    printf 'export MQTT_PASSWORD=%q\n' "${mqtt_password}"
+  } > "${MQTT_ENV}"
+  chmod 0600 "${MQTT_ENV}"
+  echo "[tecnohead-solar] MQTT service discovered from Supervisor"
+else
+  chmod 0600 "${MQTT_ENV}"
+  echo "[tecnohead-solar] MQTT service not available; manual options remain supported"
+fi
+
 mkdir -p "${PGDATA}"
 chown -R postgres:postgres "${PGDATA}"
 chmod 0700 "${PGDATA}"

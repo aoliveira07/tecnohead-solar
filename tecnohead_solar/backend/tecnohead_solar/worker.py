@@ -93,7 +93,17 @@ async def collect_one(db: Database, settings: Settings, collector: dict[str, Any
                 )
             )
         upsert_active_alerts(db, candidates)
-        await publish_discovery(settings, str(installation_row["id"]), collector, [dict(row) for row in pv_rows if row["enabled"]])
+        mqtt_state = await publish_discovery(
+            settings,
+            str(installation_row["id"]),
+            collector,
+            [dict(row) for row in pv_rows if row["enabled"]],
+        )
+        db.execute(
+            "INSERT INTO app_settings(key,value) VALUES ('mqtt_state',%s) "
+            "ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value,updated_at=now()",
+            (mqtt_state,),
+        )
     except Exception as exc:
         save_collector_probe(db, str(collector["id"]), "offline", {}, type(exc).__name__)
         LOGGER.warning("collector %s failed: %s: %s", collector["name"], type(exc).__name__, exc, exc_info=True)

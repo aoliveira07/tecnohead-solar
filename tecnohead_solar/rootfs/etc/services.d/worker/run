@@ -3,6 +3,11 @@ set -euo pipefail
 
 cd /opt/tecnohead_solar
 
+if [[ -f /run/tecnohead-solar/mqtt.env ]]; then
+  # shellcheck disable=SC1091
+  . /run/tecnohead-solar/mqtt.env
+fi
+
 until pg_isready -h /run/tecnohead-solar -p 55432 -U solar_app -d tecnohead_solar >/dev/null 2>&1; do
   sleep 1
 done

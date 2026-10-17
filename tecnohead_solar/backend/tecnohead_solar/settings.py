@@ -54,7 +54,7 @@ class Settings:
     """
 
     data_dir: Path = DATA_DIR
-    version: str = os.getenv("APP_VERSION", "0.1.9")
+    version: str = os.getenv("APP_VERSION", "0.1.10")
     log_level: str = "info"
     poll_interval: int = 60
     retention_days: int = 7
@@ -92,7 +92,7 @@ class Settings:
             mqtt_enabled=_as_bool(merged.get("mqtt_enabled"), True),
             mqtt_host=str(merged.get("mqtt_host") or os.getenv("MQTT_HOST") or "").strip(),
             mqtt_port=max(1, min(65535, _as_int(merged.get("mqtt_port") or os.getenv("MQTT_PORT"), 1883))),
-            mqtt_username=str(merged.get("mqtt_username") or os.getenv("MQTT_USERNAME") or ""),
+            mqtt_username=str(merged.get("mqtt_username") or os.getenv("MQTT_USERNAME") or os.getenv("MQTT_USER") or ""),
             mqtt_password=str(merged.get("mqtt_password") or os.getenv("MQTT_PASSWORD") or ""),
             timezone=str(merged.get("timezone") or os.getenv("TZ") or "UTC"),
             latitude=_as_float(merged.get("latitude"), None, -90, 90),
