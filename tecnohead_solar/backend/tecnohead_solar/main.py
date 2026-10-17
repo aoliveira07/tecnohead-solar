@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ipaddress
 import logging
 import uuid
 from contextlib import asynccontextmanager
@@ -39,6 +40,7 @@ from .sync import health_check, remote_history
 LOGGER = logging.getLogger("tecnohead_solar.web")
 BASE_DIR = Path(__file__).resolve().parents[2]
 FRONTEND_DIR = BASE_DIR / "frontend"
+INGRESS_PROXY_NETWORK = ipaddress.ip_network("172.30.32.0/24")
 
 settings = Settings.load()
 db = Database()
@@ -127,8 +129,13 @@ def _ingress_guard(request: Request) -> JSONResponse | None:
     if request.app.state.dev_mode:
         return None
     client_host = request.client.host if request.client else ""
-    allowed = {"172.30.32.2", "127.0.0.1", "::1"}
-    if client_host not in allowed:
+    try:
+        client_ip = ipaddress.ip_address(client_host)
+    except ValueError:
+        client_ip = None
+    allowed = client_ip in INGRESS_PROXY_NETWORK if client_ip else False
+    allowed = allowed or client_host in {"127.0.0.1", "::1"}
+    if not allowed:
         return JSONResponse(status_code=403, content={"detail": "Ingress only"})
     return None
 
@@ -146,7 +153,7 @@ async def lifespan(application: FastAPI):
     db.close()
 
 
-app = FastAPI(title="TecnoHead Solar", version="0.1.3", lifespan=lifespan)
+app = FastAPI(title="TecnoHead Solar", version="0.1.4", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[],

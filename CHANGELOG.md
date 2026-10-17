@@ -2,6 +2,10 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.4 — HAOS Ingress proxy compatibility
+
+- Accept the supervisor bridge subnet used by the HAOS Ingress proxy.
+
 ## 0.1.3 — HAOS runtime paths and PostgreSQL socket fix
 
 - Align the container frontend/logo paths with the backend runtime layout.
