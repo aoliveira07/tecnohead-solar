@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r tecnohead_solar/requirements.txt -r server/requirements.txt pytest ruff
+      - name: Lint
+        run: ruff check tecnohead_solar/backend server/api tecnohead_solar/tests server/tests
+      - name: Static release guardrails
+        run: python scripts/validate_repo.py
+      - name: Test
+        run: pytest -q
+

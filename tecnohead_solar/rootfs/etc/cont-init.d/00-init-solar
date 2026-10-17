@@ -1,0 +1,61 @@
+#!/command/with-contenv bash
+set -euo pipefail
+
+DATA_DIR="/data/tecnohead_solar"
+PGDATA="${DATA_DIR}/postgres"
+SOCKET_DIR="/run/tecnohead-solar"
+PGPORT="55432"
+PG_BIN="$(pg_config --bindir)"
+
+mkdir -p "${DATA_DIR}" "${SOCKET_DIR}"
+chown solarapp:postgres "${DATA_DIR}"
+chmod 0750 "${DATA_DIR}"
+chown -R postgres:postgres "${SOCKET_DIR}"
+chmod 0750 "${SOCKET_DIR}"
+mkdir -p "${PGDATA}"
+chown -R postgres:postgres "${PGDATA}"
+chmod 0700 "${PGDATA}"
+
+if [[ ! -f "${PGDATA}/PG_VERSION" ]]; then
+  echo "[tecnohead-solar] initializing the private PostgreSQL cluster"
+  chown -R postgres:postgres "${PGDATA}"
+  s6-setuidgid postgres "${PG_BIN}/initdb" \
+    --pgdata="${PGDATA}" \
+    --auth-local=trust \
+    --auth-host=reject \
+    --encoding=UTF8 \
+    --locale=C.UTF-8
+fi
+
+# The cluster never listens on a LAN address. The private socket is recreated
+# in /run on every boot, while the cluster itself remains in /data.
+if ! grep -q '^listen_addresses' "${PGDATA}/postgresql.conf"; then
+  printf '%s\n' "listen_addresses = ''" >> "${PGDATA}/postgresql.conf"
+fi
+if ! grep -q '^port' "${PGDATA}/postgresql.conf"; then
+  printf '%s\n' "port = ${PGPORT}" >> "${PGDATA}/postgresql.conf"
+fi
+if ! grep -q '^unix_socket_directories' "${PGDATA}/postgresql.conf"; then
+  printf '%s\n' "unix_socket_directories = '${SOCKET_DIR}'" >> "${PGDATA}/postgresql.conf"
+fi
+
+if ! grep -q '^local[[:space:]]\+all[[:space:]]\+solar_app' "${PGDATA}/pg_hba.conf"; then
+  printf '%s\n' 'local all solar_app trust' >> "${PGDATA}/pg_hba.conf"
+fi
+
+if ! s6-setuidgid postgres "${PG_BIN}/pg_ctl" -D "${PGDATA}" -o "-k ${SOCKET_DIR} -p ${PGPORT}" -w start -t 30 >/dev/null 2>&1; then
+  echo "[tecnohead-solar] PostgreSQL bootstrap start failed" >&2
+  exit 1
+fi
+
+if ! s6-setuidgid postgres "${PG_BIN}/psql" -h "${SOCKET_DIR}" -p "${PGPORT}" -d postgres -Atqc "SELECT 1 FROM pg_roles WHERE rolname='solar_app'" | grep -q '^1$'; then
+  s6-setuidgid postgres "${PG_BIN}/psql" -h "${SOCKET_DIR}" -p "${PGPORT}" -d postgres -v ON_ERROR_STOP=1 -c 'CREATE ROLE solar_app LOGIN'
+fi
+
+if ! s6-setuidgid postgres "${PG_BIN}/psql" -h "${SOCKET_DIR}" -p "${PGPORT}" -d postgres -Atqc "SELECT 1 FROM pg_database WHERE datname='tecnohead_solar'" | grep -q '^1$'; then
+  s6-setuidgid postgres "${PG_BIN}/createdb" -h "${SOCKET_DIR}" -p "${PGPORT}" -O solar_app tecnohead_solar
+fi
+
+s6-setuidgid postgres "${PG_BIN}/pg_ctl" -D "${PGDATA}" -m fast -w stop -t 30 >/dev/null
+chown -R solarapp:solarapp "${DATA_DIR}/exports" 2>/dev/null || true
+echo "[tecnohead-solar] private PostgreSQL cluster is ready"

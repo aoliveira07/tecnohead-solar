@@ -1,0 +1,12 @@
+fastapi==0.143.3
+uvicorn[standard]==0.54.0
+httpx==0.28.1
+psycopg[binary]==3.3.6
+psycopg-pool==3.3.3
+pysolarmanv5==3.0.6
+umodbus==1.0.4
+pyserial==3.5
+aiomqtt==2.5.1
+pydantic==2.14.1
+python-multipart==0.0.32
+reportlab==5.0.1

@@ -1,0 +1,53 @@
+name: "TecnoHead Solar"
+slug: "tecnohead_solar"
+version: "0.1.0"
+description: "Monitor local de microinversores Deye, histórico e diagnóstico solar."
+url: "https://github.com/aoliveira07/tecnohead-solar/tree/main/tecnohead_solar"
+stage: experimental
+startup: application
+boot: auto
+arch:
+  - amd64
+  - aarch64
+init: false
+image: "ghcr.io/aoliveira07/tecnohead-solar"
+ingress: true
+ingress_port: 8099
+ingress_stream: true
+panel_icon: mdi:solar-power
+panel_title: "TecnoHead Solar"
+panel_admin: false
+watchdog: "http://[HOST]:8099/health"
+services:
+  - mqtt:want
+backup: cold
+options:
+  log_level: info
+  poll_interval: 60
+  retention_days: 7
+  api_enabled: false
+  api_url: ""
+  api_token: ""
+  mqtt_enabled: true
+  mqtt_host: ""
+  mqtt_port: 1883
+  mqtt_username: ""
+  mqtt_password: ""
+  timezone: ""
+  latitude: 0
+  longitude: 0
+schema:
+  log_level: list(trace|debug|info|warning|error)
+  poll_interval: int(15,900)
+  retention_days: int(1,30)
+  api_enabled: bool
+  api_url: str
+  api_token: password
+  mqtt_enabled: bool
+  mqtt_host: str
+  mqtt_port: port
+  mqtt_username: str
+  mqtt_password: password
+  timezone: str
+  latitude: float
+  longitude: float

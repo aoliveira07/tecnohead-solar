@@ -1,0 +1,18 @@
+[Unit]
+Description=TecnoHead Solar per-client API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=%h/.local/share/tecnohead-solar-server
+EnvironmentFile=%h/.local/share/tecnohead-solar-server/server.env
+Environment=PYTHONPATH=%h/.local/share/tecnohead-solar-server/api
+ExecStart=%h/.local/share/tecnohead-solar-server/.venv/bin/uvicorn tecnohead_solar_server.main:app --host 127.0.0.1 --port 18081
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
+

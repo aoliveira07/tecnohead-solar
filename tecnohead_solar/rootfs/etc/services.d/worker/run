@@ -1,0 +1,8 @@
+#!/command/with-contenv bash
+set -euo pipefail
+
+until pg_isready -h /run/tecnohead-solar -p 55432 -U solar_app -d tecnohead_solar >/dev/null 2>&1; do
+  sleep 1
+done
+
+exec s6-setuidgid solarapp python3 -m tecnohead_solar.worker

@@ -1,0 +1,8 @@
+#!/command/with-contenv bash
+set -euo pipefail
+
+PG_BIN="$(pg_config --bindir)"
+exec s6-setuidgid postgres "${PG_BIN}/postgres" \
+  -D /data/tecnohead_solar/postgres \
+  -k /run/tecnohead-solar \
+  -p 55432

@@ -1,0 +1,13 @@
+[project]
+name = "tecnohead-solar"
+version = "0.1.0"
+description = "Local TecnoHead Solar monitoring for Home Assistant OS and Deye loggers"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.pytest.ini_options]
+testpaths = ["tecnohead_solar/tests", "server/tests"]
+pythonpath = ["tecnohead_solar/backend", "server/api"]

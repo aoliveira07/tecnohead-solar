@@ -1,0 +1,45 @@
+configuration:
+  log_level:
+    name: Nível de log
+    description: Detalhamento do log do App.
+  poll_interval:
+    name: Intervalo de coleta
+    description: Intervalo entre leituras locais dos coletores Deye, em segundos.
+  retention_days:
+    name: Retenção local normal
+    description: Dias de leituras confirmadas mantidos no PostgreSQL local.
+  api_enabled:
+    name: API externa habilitada
+    description: Ativa o envio opcional para a API privada desta instalação.
+  api_url:
+    name: URL da API externa
+    description: Endpoint base da API do próprio cliente, sem credenciais na URL.
+  api_token:
+    name: Token da API externa
+    description: Token privado armazenado apenas nas opções do App.
+  mqtt_enabled:
+    name: MQTT Discovery habilitado
+    description: Publica sensores no broker Home Assistant quando disponível.
+  mqtt_host:
+    name: Host MQTT manual
+    description: Deixe vazio para usar o serviço MQTT fornecido pelo Supervisor.
+  mqtt_port:
+    name: Porta MQTT
+    description: Porta TCP do broker MQTT.
+  mqtt_username:
+    name: Usuário MQTT
+    description: Usuário opcional do broker.
+  mqtt_password:
+    name: Senha MQTT
+    description: Senha opcional do broker.
+  timezone:
+    name: Fuso horário
+    description: Fuso usado na apresentação; vazio usa o fuso do Home Assistant quando disponível.
+  latitude:
+    name: Latitude
+    description: Latitude da instalação para o potencial teórico offline.
+  longitude:
+    name: Longitude
+    description: Longitude da instalação para o potencial teórico offline.
+network:
+  8099/tcp: Interface interna do App; use Ingress, não exponha esta porta na LAN.
