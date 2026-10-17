@@ -250,11 +250,20 @@ def summary(db: Database, installation_id: str | None = None) -> dict[str, Any]:
     iid = installation_id or installation_row["id"]
     latest = db.fetch_one(
         """
-        SELECT COALESCE(sum(power_ac_w) FILTER (WHERE pv_input_id IS NULL),0) AS power_ac_w,
-               COALESCE(sum(energy_today_kwh) FILTER (WHERE pv_input_id IS NULL),0) AS energy_today_kwh,
-               COALESCE(sum(energy_total_kwh) FILTER (WHERE pv_input_id IS NULL),0) AS energy_total_kwh,
+        WITH latest_per_collector AS (
+            SELECT DISTINCT ON (collector_id)
+                   power_ac_w, energy_today_kwh, energy_total_kwh, captured_at
+            FROM readings
+            WHERE installation_id=%s
+              AND pv_input_id IS NULL
+              AND captured_at > now()-interval '10 minutes'
+            ORDER BY collector_id, captured_at DESC, received_at DESC
+        )
+        SELECT COALESCE(sum(power_ac_w),0) AS power_ac_w,
+               COALESCE(sum(energy_today_kwh),0) AS energy_today_kwh,
+               COALESCE(sum(energy_total_kwh),0) AS energy_total_kwh,
                max(captured_at) AS latest_at
-        FROM readings WHERE installation_id=%s AND captured_at > now()-interval '10 minutes'
+        FROM latest_per_collector
         """,
         (iid,),
     ) or {}

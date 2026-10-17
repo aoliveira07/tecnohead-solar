@@ -2,6 +2,12 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.11 — Latest-sample dashboard summary
+
+- Aggregate the dashboard's AC power and energy cards from the newest sample
+  of each collector instead of repeatedly summing every sample in the rolling
+  ten-minute window.
+
 ## 0.1.10 — Supervisor MQTT service discovery
 
 - Consume the Home Assistant MQTT service supplied by Supervisor when the App
