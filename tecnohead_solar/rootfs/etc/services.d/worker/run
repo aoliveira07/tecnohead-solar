@@ -1,6 +1,8 @@
 #!/command/with-contenv bash
 set -euo pipefail
 
+cd /opt/tecnohead_solar
+
 until pg_isready -h /run/tecnohead-solar -p 55432 -U solar_app -d tecnohead_solar >/dev/null 2>&1; do
   sleep 1
 done

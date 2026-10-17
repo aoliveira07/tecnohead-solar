@@ -2,6 +2,10 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.2 — HAOS startup fix
+
+- Set the service working directory explicitly so the web and collector processes import the bundled package on HAOS.
+
 ## 0.1.1 — experimental field build
 
 - Hybrid history/report source: remote acknowledged readings plus local pending records without duplicate IDs.
