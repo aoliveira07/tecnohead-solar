@@ -2,6 +2,10 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.6 — JSONB collector probe persistence fix
+
+- Serialize the collector probe payload as PostgreSQL JSONB so physical diagnostics and the background worker can persist successful Deye reads.
+
 ## 0.1.5 — JSONB reading persistence fix
 
 - Adapt local reading payloads as PostgreSQL JSONB before insertion.

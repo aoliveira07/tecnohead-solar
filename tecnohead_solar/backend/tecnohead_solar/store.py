@@ -179,7 +179,7 @@ def save_collector_probe(db: Database, collector_id: str, status: str, payload: 
         UPDATE collectors SET last_seen_at=CASE WHEN %s='online' THEN now() ELSE last_seen_at END,
           last_status=%s,last_error=%s,last_payload=%s,updated_at=now() WHERE id=%s
         """,
-        (status, status, error, payload, collector_id),
+        (status, status, error, Jsonb(payload), collector_id),
     )
 
 
