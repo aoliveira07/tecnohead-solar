@@ -1,16 +1,16 @@
 # Capturas reais sanitizadas
 
-As capturas desta pasta devem ser feitas após a instalação real. Antes de publicar, substitua ou cubra IPs, serial de logger/inversor, latitude/longitude precisa, nome da residência, tokens, senhas, URLs privadas e qualquer dado pessoal.
+As imagens abaixo foram capturadas da instalação real no Home Assistant OS em 17/10/2026, após a atualização para 0.1.13. IPs, seriais de logger/inversor, coordenadas, identificador do host, endpoint privado e payload JSON foram cobertos; os estados, contagens e medições de operação continuam sendo evidência real.
 
-Galeria esperada:
+| Tela | Evidência |
+|---|---|
+| Instalação no Supervisor | ![Instalação real no Supervisor](installation-0.1.13.png) |
+| Modal de atualização | ![Atualização real do App](installation-update-0.1.13.png) |
+| Visão geral | ![Visão geral real](overview-0.1.13.png) |
+| Microinversores | ![Cinco coletores reais](collectors-0.1.13.png) |
+| Esquema técnico das placas | ![Esquema real das 19 entradas habilitadas](map-0.1.13.png) |
+| Diagnósticos e alertas | ![Diagnóstico real sanitizado](diagnostics-0.1.13.png) |
+| Histórico e relatórios | ![Histórico real](history-0.1.13.png) |
+| Configurações | ![Configurações reais sanitizadas](settings-0.1.13.png) |
 
-1. instalação/versão no Supervisor;
-2. menu lateral e Visão geral;
-3. Microinversores e detalhe PV1–PV4;
-4. esquema técnico das placas;
-5. histórico e relatórios;
-6. diagnósticos e alertas;
-7. configurações, MQTT e API sem segredos.
-
-Cada arquivo deve indicar no nome a tela e a versão, e a legenda deve dizer se a informação é real, sanitizada e qual teste ela evidencia.
-
+Os arquivos-fonte das capturas permanecem fora do repositório. O script [`scripts/sanitize_screenshots.py`](../../scripts/sanitize_screenshots.py) reproduz a camada de sanitização a partir dos arquivos temporários locais sem inserir credenciais ou dados residenciais no GitHub.
