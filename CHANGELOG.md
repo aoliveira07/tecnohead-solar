@@ -2,6 +2,11 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.13 — Diagnostic persistence fix
+
+- Serialize PostgreSQL `inet` values before storing diagnostic results in JSONB.
+- Add regression coverage for network address values returned by the local collector query.
+
 ## 0.1.12 — Homologation evidence and schematic layout
 
 - Preserve the latest field diagnostic result in the local PostgreSQL store and

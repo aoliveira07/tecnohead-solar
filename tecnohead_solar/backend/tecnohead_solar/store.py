@@ -7,6 +7,7 @@ import io
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from ipaddress import IPv4Address, IPv6Address
 from typing import Any
 
 from psycopg.types.json import Jsonb
@@ -24,6 +25,8 @@ def as_iso(value: Any) -> Any:
     if isinstance(value, Decimal):
         return float(value)
     if isinstance(value, uuid.UUID):
+        return str(value)
+    if isinstance(value, (IPv4Address, IPv6Address)):
         return str(value)
     if isinstance(value, dict):
         return {key: as_iso(item) for key, item in value.items()}
