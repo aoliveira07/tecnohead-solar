@@ -31,6 +31,7 @@ O produto funciona sem HACS, sem nuvem Deye/Solarman e sem alterar o Recorder do
 - [`docs/MANUAL_IMPLANTACAO_CLIENTE.md`](docs/MANUAL_IMPLANTACAO_CLIENTE.md) — implantação reproduzível.
 - [`docs/INSTALL_HAOS.md`](docs/INSTALL_HAOS.md) — HAOS, Ingress, backup e atualização.
 - [`docs/INSTALL_SERVER.md`](docs/INSTALL_SERVER.md) — API/PostgreSQL opcional em servidor próprio.
+- [`docs/ADMIN_POSTGRES_WINDOWS.md`](docs/ADMIN_POSTGRES_WINDOWS.md) — administração do banco com pgAdmin/DBeaver.
 - [`docs/OPERACAO_E_DIAGNOSTICO.md`](docs/OPERACAO_E_DIAGNOSTICO.md) — testes, falhas e evidências.
 - [`docs/HOMOLOGACAO.md`](docs/HOMOLOGACAO.md) — checklist executado, bloqueado ou não realizado.
 - [`docs/screenshots/README.md`](docs/screenshots/README.md) — galeria sanitizada de capturas reais.
