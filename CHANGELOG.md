@@ -2,6 +2,11 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.8 — Reading insert parameter count
+
+- Match the PostgreSQL readings insert placeholders to its 18 parameters.
+- Add a regression test for the insert statement shape.
+
 ## 0.1.7 — Runtime version and diagnostic evidence
 
 - Keep the API/UI version aligned with the App manifest and image tag.

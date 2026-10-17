@@ -2,7 +2,11 @@ import uuid
 from datetime import UTC, datetime
 from decimal import Decimal
 
-from tecnohead_solar.store import serialize
+from tecnohead_solar.store import READING_INSERT_SQL, serialize
+
+
+def test_reading_insert_sql_matches_reading_parameters() -> None:
+    assert READING_INSERT_SQL.count("%s") == 18
 
 
 def test_serialize_makes_database_rows_json_safe() -> None:

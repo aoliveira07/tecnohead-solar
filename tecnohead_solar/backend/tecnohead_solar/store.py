@@ -183,6 +183,16 @@ def save_collector_probe(db: Database, collector_id: str, status: str, payload: 
     )
 
 
+READING_INSERT_SQL = """
+    INSERT INTO readings(
+      reading_id,installation_id,collector_id,pv_input_id,captured_at,power_ac_w,
+      energy_today_kwh,energy_total_kwh,voltage_v,current_a,power_dc_w,frequency_hz,
+      temperature_c,status,quality,source,sync_state,raw_payload
+    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    ON CONFLICT(reading_id) DO UPDATE SET received_at=now(),raw_payload=EXCLUDED.raw_payload
+"""
+
+
 def save_reading(
     db: Database,
     *,
@@ -197,14 +207,7 @@ def save_reading(
 ) -> None:
     with db.connection() as connection, connection.transaction():
         connection.execute(
-            """
-                INSERT INTO readings(
-                  reading_id,installation_id,collector_id,pv_input_id,captured_at,power_ac_w,
-                  energy_today_kwh,energy_total_kwh,voltage_v,current_a,power_dc_w,frequency_hz,
-                  temperature_c,status,quality,source,sync_state,raw_payload
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                ON CONFLICT(reading_id) DO UPDATE SET received_at=now(),raw_payload=EXCLUDED.raw_payload
-                """,
+            READING_INSERT_SQL,
             (
                 reading_id,
                 installation_id,
