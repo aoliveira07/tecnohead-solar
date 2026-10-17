@@ -1,6 +1,6 @@
 FROM ghcr.io/home-assistant/base-debian:trixie
 
-ARG BUILD_VERSION=0.1.2
+ARG BUILD_VERSION=0.1.3
 ARG BUILD_ARCH=local
 
 LABEL \
@@ -31,7 +31,8 @@ RUN useradd --system --home-dir /var/lib/tecnohead-solar --create-home \
       --shell /usr/sbin/nologin solarapp
 
 COPY backend/tecnohead_solar /opt/tecnohead_solar/tecnohead_solar
-COPY frontend /opt/tecnohead_solar/frontend
+COPY frontend /opt/frontend
+COPY logo.png /opt/logo.png
 COPY rootfs /
 
 RUN chmod 0755 /etc/cont-init.d/00-init-solar \
@@ -39,7 +40,8 @@ RUN chmod 0755 /etc/cont-init.d/00-init-solar \
       /etc/services.d/web/run \
       /etc/services.d/worker/run \
     && mkdir -p /data/tecnohead_solar /run/tecnohead-solar \
-    && chown -R solarapp:solarapp /opt/tecnohead_solar \
+    && chown -R solarapp:solarapp /opt/tecnohead_solar /opt/frontend \
+    && chown solarapp:solarapp /opt/logo.png \
     && chown -R postgres:postgres /data/tecnohead_solar /run/tecnohead-solar
 
 WORKDIR /opt/tecnohead_solar

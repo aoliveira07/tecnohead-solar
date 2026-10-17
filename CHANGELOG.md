@@ -2,6 +2,11 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.3 — HAOS runtime paths and PostgreSQL socket fix
+
+- Align the container frontend/logo paths with the backend runtime layout.
+- Allow the `solarapp` service user to traverse the private PostgreSQL socket directory.
+
 ## 0.1.2 — HAOS startup fix
 
 - Set the service working directory explicitly so the web and collector processes import the bundled package on HAOS.
