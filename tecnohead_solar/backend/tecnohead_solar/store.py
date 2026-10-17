@@ -9,6 +9,8 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
+from psycopg.types.json import Jsonb
+
 from .db import Database
 
 
@@ -221,7 +223,7 @@ def save_reading(
                 metrics.get("quality", "valid"),
                 metrics.get("source", "local_deye"),
                 sync_state,
-                raw_payload,
+                Jsonb(raw_payload),
             ),
         )
         if sync_state == "pending":

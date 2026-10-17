@@ -153,7 +153,7 @@ async def lifespan(application: FastAPI):
     db.close()
 
 
-app = FastAPI(title="TecnoHead Solar", version="0.1.4", lifespan=lifespan)
+app = FastAPI(title="TecnoHead Solar", version="0.1.5", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[],
