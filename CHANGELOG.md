@@ -2,6 +2,12 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.1 — experimental field build
+
+- Hybrid history/report source: remote acknowledged readings plus local pending records without duplicate IDs.
+- Hardened repeated setup saves, coordinate validation, JSON serialization and server schema isolation.
+- Added remote alerts endpoint and expanded release validation/tests.
+
 ## 0.1.0 — experimental field build
 
 - First independent Home Assistant OS App repository.

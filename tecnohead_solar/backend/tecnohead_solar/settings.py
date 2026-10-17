@@ -54,7 +54,7 @@ class Settings:
     """
 
     data_dir: Path = DATA_DIR
-    version: str = os.getenv("APP_VERSION", "0.1.0")
+    version: str = os.getenv("APP_VERSION", "0.1.1")
     log_level: str = "info"
     poll_interval: int = 60
     retention_days: int = 7
