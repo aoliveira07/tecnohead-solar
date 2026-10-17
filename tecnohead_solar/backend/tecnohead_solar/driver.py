@@ -69,11 +69,14 @@ def decode_micro_registers(registers: list[int], logger_serial: int) -> Collecto
 
     captured_at = datetime.now(UTC)
     channels: list[PVChannelReading] = []
+    total_offsets = {1: 9, 2: 11, 3: 14, 4: 17}
     for channel in range(1, 5):
         voltage_offset = 49 + (channel - 1) * 2  # register 109, 111, 113, 115
         current_offset = voltage_offset + 1
         day_offset = 5 + (channel - 1)  # register 65..68
-        total_offset = 9 + (channel - 1) * 2  # register pairs 69/70..77/78
+        # The reviewed micro profile has AC register 73 between PV2 and PV3;
+        # the PV total-energy pairs therefore are 69/70, 71/72, 74/75, 77/78.
+        total_offset = total_offsets[channel]
         voltage = _scaled_u16(registers, voltage_offset, 0.1)
         current = _scaled_u16(registers, current_offset, 0.1)
         power = round(voltage * current, 3) if voltage is not None and current is not None else None

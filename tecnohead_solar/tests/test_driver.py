@@ -12,9 +12,10 @@ def test_decode_micro_profile_registers_without_network() -> None:
     put_u32(registers, 3, 123456)
     registers[19] = 6000
     put_u32(registers, 26, 19875)
+    total_offsets = (9, 11, 14, 17)
     for channel in range(4):
         registers[5 + channel] = 8 + channel
-        put_u32(registers, 9 + channel * 2, 9000 + channel * 100)
+        put_u32(registers, total_offsets[channel], 9000 + channel * 100)
         registers[49 + channel * 2] = 320 + channel
         registers[50 + channel * 2] = 150 + channel
 
@@ -27,6 +28,12 @@ def test_decode_micro_profile_registers_without_network() -> None:
     assert result.channels[0].voltage_v == 32.0
     assert result.channels[0].current_a == 15.0
     assert result.channels[0].power_dc_w == 480.0
+    assert [channel.energy_total_kwh for channel in result.channels] == [
+        900.0,
+        910.0,
+        920.0,
+        930.0,
+    ]
     assert all(channel.supported for channel in result.channels)
 
 

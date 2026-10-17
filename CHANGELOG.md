@@ -2,6 +2,11 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.9 — Corrected micro PV total-energy offsets
+
+- Corrected the Deye micro register map for PV3/PV4 accumulated energy, which are separated from PV1/PV2 by the AC voltage register at address 73.
+- Added a regression assertion covering all four channel total-energy offsets.
+
 ## 0.1.8 — Reading insert parameter count
 
 - Match the PostgreSQL readings insert placeholders to its 18 parameters.
