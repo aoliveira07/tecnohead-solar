@@ -2,6 +2,11 @@
 
 All notable changes to TecnoHead Solar are documented here.
 
+## 0.1.7 — Runtime version and diagnostic evidence
+
+- Keep the API/UI version aligned with the App manifest and image tag.
+- Include the database exception detail and traceback in diagnostic logs for real field troubleshooting.
+
 ## 0.1.6 — JSONB collector probe persistence fix
 
 - Serialize the collector probe payload as PostgreSQL JSONB so physical diagnostics and the background worker can persist successful Deye reads.

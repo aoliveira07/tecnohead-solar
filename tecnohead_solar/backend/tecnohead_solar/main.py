@@ -15,6 +15,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 
+from . import __version__
 from .db import Database
 from .driver import read_collector_async
 from .forecast import theoretical_forecast
@@ -153,7 +154,7 @@ async def lifespan(application: FastAPI):
     db.close()
 
 
-app = FastAPI(title="TecnoHead Solar", version="0.1.5", lifespan=lifespan)
+app = FastAPI(title="TecnoHead Solar", version=__version__, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[],
@@ -327,7 +328,7 @@ async def _probe_collector(collector_id: str) -> dict[str, Any]:
     except HTTPException:
         raise
     except Exception as exc:
-        error = type(exc).__name__
+        error = f"{type(exc).__name__}: {exc}"
         save_collector_probe(db, collector_id, "offline", {}, error)
         raise HTTPException(status_code=502, detail=f"Leitura Deye falhou: {error}") from exc
 

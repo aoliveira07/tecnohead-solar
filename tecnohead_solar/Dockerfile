@@ -1,6 +1,6 @@
 FROM ghcr.io/home-assistant/base-debian:trixie
 
-ARG BUILD_VERSION=0.1.6
+ARG BUILD_VERSION=0.1.7
 ARG BUILD_ARCH=local
 
 LABEL \
@@ -10,7 +10,8 @@ LABEL \
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    TZ=UTC
+    TZ=UTC \
+    APP_VERSION="${BUILD_VERSION}"
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \

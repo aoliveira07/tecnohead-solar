@@ -94,9 +94,9 @@ async def collect_one(db: Database, settings: Settings, collector: dict[str, Any
             )
         upsert_active_alerts(db, candidates)
         await publish_discovery(settings, str(installation_row["id"]), collector, [dict(row) for row in pv_rows if row["enabled"]])
-    except Exception as exc:  # noqa: BLE001 - one failed logger must not stop the worker
+    except Exception as exc:
         save_collector_probe(db, str(collector["id"]), "offline", {}, type(exc).__name__)
-        LOGGER.warning("collector %s failed: %s", collector["name"], type(exc).__name__)
+        LOGGER.warning("collector %s failed: %s: %s", collector["name"], type(exc).__name__, exc, exc_info=True)
 
 
 async def run() -> None:
